@@ -27,35 +27,36 @@ textbox.
 3. Add the code below in the UserForm
 
 
-    Private oEventHandler As New clsSearchableDropdown
+```visualbasic
+Private oEventHandler As New clsSearchableDropdown
 
-    Public Property Let ListData(ByVal rg As Range)
-    oEventHandler.ItemsRange = rg.Value
-    End Property
+Public Property Let ListData(ByVal rg As Range)
+  oEventHandler.ItemsRange = rg.Value
+End Property
 
-    Private Sub UserForm_Initialize()
+Private Sub UserForm_Initialize()
 
-      ' Settings
-      With oEventHandler
+  ' Settings
+  With oEventHandler
 
-        ' Attach the textbox and listbox to the class
-         Set .SearchListBox = Me.ListBox1
-         Set .SearchTextBox = Me.TextBox1
+    ' Attach the textbox and listbox to the class
+     Set .SearchListBox = Me.ListBox1
+     Set .SearchTextBox = Me.TextBox1
 
-        ' Default settings
-        .MaxRows = 6
-        .ShowAllMatches = False
-        .CompareMethod = vbTextCompare
-        .WindowsVersion = True
+    ' Default settings
+    .MaxRows = 6
+    .ShowAllMatches = False
+    .CompareMethod = vbTextCompare
+    .WindowsVersion = True
 
-      End With
+  End With
 
-    End Sub
+End Sub
 
-    Private Sub UserForm_Terminate()
-        Set oEventHandler = Nothing
-    End Sub
-
+Private Sub UserForm_Terminate()
+    Set oEventHandler = Nothing
+End Sub
+```
 
 4. Add the following code to the module that will display the UserForm
 
