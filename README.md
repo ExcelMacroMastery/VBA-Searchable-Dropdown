@@ -1,9 +1,10 @@
 # VBA-Searchable-Dropdown
 
 clsSearchableDropdown
+
 https://ExcelMacroMastery.com/
+
 Author: Paul Kelly
-Version: 2.0
 Description: Searchable Dropdown list
              The code in this class allows the user to
              create a searchable dropdown for a VBA UserForm.
