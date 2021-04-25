@@ -24,10 +24,9 @@ Place the textbox where you want it to appear and add the font size and settings
 The listbox can be placed anywhere as the code will resize and set the position and font based on the 
 textbox.
 
-3. Add the code below in the UserForm
-
-
-```visualbasic
+3. Add the code below in the UserForm:
+4. 
+``` 
 Private oEventHandler As New clsSearchableDropdown
 
 Public Property Let ListData(ByVal rg As Range)
@@ -62,7 +61,7 @@ End Sub
 
    Note: The range should be the range of the data that you want to filter
    on the form
-
+``` 
     Sub Main()
 
       Dim frm As UserForm1
@@ -72,7 +71,7 @@ End Sub
       frm.show
     
     End Sub
-
+``` 
 
 
 
