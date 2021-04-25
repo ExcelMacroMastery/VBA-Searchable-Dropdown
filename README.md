@@ -26,53 +26,52 @@ textbox.
 
 3. Add the code below in the UserForm
 
-*** START OF CODE TO ADD ***
-Private oEventHandler As New clsSearchableDropdown
 
-Public Property Let ListData(ByVal rg As Range)
+    Private oEventHandler As New clsSearchableDropdown
+
+    Public Property Let ListData(ByVal rg As Range)
     oEventHandler.ItemsRange = rg.Value
-End Property
+    End Property
 
-Private Sub UserForm_Initialize()
+    Private Sub UserForm_Initialize()
 
-    ' Settings
-    With oEventHandler
+      ' Settings
+      With oEventHandler
 
-    ' Attach the textbox and listbox to the class
-     Set .SearchListBox = Me.ListBox1
-     Set .SearchTextBox = Me.TextBox1
-    
-    ' Default settings
-    .MaxRows = 6
-    .ShowAllMatches = False
-    .CompareMethod = vbTextCompare
-    .WindowsVersion = True
+        ' Attach the textbox and listbox to the class
+         Set .SearchListBox = Me.ListBox1
+         Set .SearchTextBox = Me.TextBox1
 
-    End With
+        ' Default settings
+        .MaxRows = 6
+        .ShowAllMatches = False
+        .CompareMethod = vbTextCompare
+        .WindowsVersion = True
 
-End Sub
+      End With
 
-Private Sub UserForm_Terminate()
-    Set oEventHandler = Nothing
-End Sub
-*** END OF CODE TO ADD ***
+    End Sub
+
+    Private Sub UserForm_Terminate()
+        Set oEventHandler = Nothing
+    End Sub
+
 
 4. Add the following code to the module that will display the UserForm
 
    Note: The range should be the range of the data that you want to filter
    on the form
 
-*** START OF CODE TO ADD ***
-Sub Main()
+    Sub Main()
 
-    Dim frm As UserForm1
-    Set frm = UserForms.Add(UserForm1.Name)
-    frm.ListData = Sheet1.Range("A1").CurrentRegion
+      Dim frm As UserForm1
+      Set frm = UserForms.Add(UserForm1.Name)
+      frm.ListData = Sheet1.Range("A1").CurrentRegion
+
+      frm.show
     
-    frm.show
-    
-End Sub
-*** END OF CODE TO ADD ***
+    End Sub
+
 
 
 
