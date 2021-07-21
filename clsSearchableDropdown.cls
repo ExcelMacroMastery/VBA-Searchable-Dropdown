@@ -40,15 +40,17 @@ Option Explicit
 '    End Property
 '
 '    Private Sub UserForm_Initialize()
-
-'        Set oEventHandler.SearchListBox = Me.ListBox1
-'        Set oEventHandler.SearchTextBox = Me.TextBox1
+'
+'       With oEventHandler
+'           Set .SearchListBox = Me.ListBox1
+'           Set .SearchTextBox = Me.TextBox1
 '
 '        ' Settings
-'        .MaxRows = 6 ' set the number of items to be displayed
-'        .ShowAllMatches = False ' to show all the matches
-'        .CompareMethod = vbTextCompare ' use vbBinaryCompare for case sensitivity
-'        .WindowsVersion = True  ' set to False if using Mac
+'           .MaxRows = 6 ' set the number of items to be displayed
+'           .ShowAllMatches = False ' to show all the matches
+'           .CompareMethod = vbTextCompare ' use vbBinaryCompare for case sensitivity
+'           .WindowsVersion = True  ' set to False if using Mac
+'       End With
 '
 '    End Sub
 '
@@ -58,7 +60,8 @@ Option Explicit
 '
 '    *** END OF CODE TO ADD ***
 '
-' 5. Add the following code to the module that will display the UserForm
+' 5. Add the following code to the module that will display the UserForm. If you already have 
+'    code to display the UserForm then you only need the ListData line.
 '
 '    Note: The range should be the range of the data that you want to filter
 '    on the form
@@ -167,11 +170,12 @@ End Sub
 ' https://ExcelMacroMastery.com/
 ' Author: Paul Kelly
 ' YouTube video: https://youtu.be/gkLB-xu_JTU
-Private Sub myListBox_Click()
+Private Sub myListBox_DblClick(ByVal Cancel As MSForms.ReturnBoolean)
     ' If the user clicks or presses enter then
     ' place the selected value in the textbox
     If m_UpdateControl = False Then
         SetTextboxValue myListBox.value
+        Call ShowListbox(False)
     End If
 End Sub
 
@@ -236,9 +240,13 @@ Private Sub UpdateListbox(items As Variant)
         
         ' Set the listbox size
         If .ListCount > 0 Then
+        
             ' items found
             .ListIndex = 0
             Call SetListboxPosition
+            
+            ' add a hidden row if only one item
+            ' This is because there is no click event if only on item
         Else
             ' No items found
             .List = Array("No items found!")
@@ -543,30 +551,5 @@ Private Function FilterDataWindowsOnly() As Variant
     FilterDataWindowsOnly = coll.ToArray
 
 End Function
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
