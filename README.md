@@ -26,7 +26,7 @@ The listbox can be placed anywhere as the code will resize and set the position 
 textbox.
 
 3. Add the code below in the UserForm:
-4. 
+
 ``` 
 Private oEventHandler As New clsSearchableDropdown
 
