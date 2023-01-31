@@ -47,7 +47,6 @@ Private Sub UserForm_Initialize()
     .MaxRows = 6
     .ShowAllMatches = False
     .CompareMethod = vbTextCompare
-    .WindowsVersion = True
 
   End With
 
@@ -73,21 +72,4 @@ End Sub
     
     End Sub
 ``` 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
