@@ -12,7 +12,14 @@ Option Explicit
 ' clsSearchableDropdown
 ' https://ExcelMacroMastery.com/
 ' Author: Paul Kelly
-' Version: 2.0
+' Version: 2.1 Updated 30-01-2023
+' Updates in this version:
+' * Replaced the two filtering methods that used the VBA filter function(used for Mac)
+'   and ArrayList(for windows). Arraylist is now problematic as it requires installation
+'   of a specific .Net Library.
+'   The updated FilterListBox method uses the array to filter and is 10 times
+'   faster than the VBA function. It will work on both Windows and Mac.
+'
 ' Description: Searchable Dropdown list
 '              The code in this class allows the user to
 '              create a searchable dropdown list of items.
@@ -49,7 +56,6 @@ Option Explicit
 '           .MaxRows = 6 ' set the number of items to be displayed
 '           .ShowAllMatches = False ' to show all the matches
 '           .CompareMethod = vbTextCompare ' use vbBinaryCompare for case sensitivity
-'           .WindowsVersion = True  ' set to False if using Mac
 '       End With
 '
 '    End Sub
@@ -60,7 +66,7 @@ Option Explicit
 '
 '    *** END OF CODE TO ADD ***
 '
-' 5. Add the following code to the module that will display the UserForm. If you already have 
+' 5. Add the following code to the module that will display the UserForm. If you already have
 '    code to display the UserForm then you only need the ListData line.
 '
 '    Note: The range should be the range of the data that you want to filter
@@ -89,7 +95,6 @@ Private m_listOfItems As Variant            ' This is the array of items that is
 Private m_maxRows As Long                   ' The number of rows to be displayed in the listbox.
 Private m_startText As String               ' Start text in the textbox
 Private m_showAllMatches As Boolean         ' True: shows all matches. False show the number of rows specified by m_MaxRows
-Private m_windowsVersion As Boolean         ' WindowsVersion uses ArrayList and MacVersion uses the VBA Filter Function
 
 ' This is used to prevent events running when changes are being made
 Private m_UpdateControl As Boolean
@@ -134,9 +139,6 @@ Public Property Let ShowAllMatches(ByVal state As Boolean)
     m_showAllMatches = state
     Call FilterListBox
 End Property
-Public Property Let WindowsVersion(ByVal value As Boolean)
-    m_windowsVersion = value
-End Property
 
 Public Property Set SearchListBox(ByVal oListBox As MSForms.listbox)
     Set myListBox = oListBox
@@ -160,7 +162,6 @@ Private Sub Class_Initialize()
     m_maxRows = m_conMaxRows
     m_startText = "Type the item you wish to search for"
     m_showAllMatches = False
-    m_windowsVersion = True
     
 End Sub
 
@@ -236,22 +237,20 @@ Private Sub UpdateListbox(items As Variant)
         ' Reload listbox
         .Clear
         .ForeColor = rgbBlack
-        .List = items
         
         ' Set the listbox size
-        If .ListCount > 0 Then
-        
-            ' items found
-            .ListIndex = 0
-            Call SetListboxPosition
-            
-            ' add a hidden row if only one item
-            ' This is because there is no click event if only on item
-        Else
+        If IsEmpty(items) Then
             ' No items found
             .List = Array("No items found!")
             .ForeColor = rgbRed
+        Else
+            ' items found
+            .List = items
+            .ListIndex = 0
         End If
+        
+        ' Resize the listbox
+        Call SetListboxPosition
          
          ' If show all matches then have a scrollbar
         If m_showAllMatches = True Then
@@ -261,7 +260,7 @@ Private Sub UpdateListbox(items As Variant)
         End If
     
     End With
-'    Debug.Print myTextBox.Font.Size, myListBox.ListCount, myListBox.Height
+
 End Sub
 
 
@@ -488,11 +487,7 @@ Public Sub FilterListBox()
     m_UpdateControl = True
 
     Dim items As Variant
-    If m_windowsVersion = True Then
-        items = FilterDataWindowsOnly
-    Else
-        items = FilterDataWindowsMac
-    End If
+    items = FilterData
       
     Call UpdateListbox(items)
       
@@ -500,56 +495,40 @@ Public Sub FilterListBox()
     
 End Sub
 
-' https://ExcelMacroMastery.com/
-' Author: Paul Kelly
-' YouTube video: https://youtu.be/gkLB-xu_JTU
-' Description: This version uses the Filter function and
-'              should work on the mac but I haven't tested it
-' Note: There is an upword limit on Transpose and this method is approx 10x
-'       slower than using the ArrayList
-Private Function FilterDataWindowsMac() As Variant
-
-    Dim arr As Variant
-    arr = Application.Transpose(WorksheetFunction.Index(m_listOfItems, 0, 1))
-    
-    FilterDataWindowsMac = Filter(arr, myTextBox.value, True, m_compareMethod)
-    
-    
-
-End Function
-
-' https://ExcelMacroMastery.com/
-' Author: Paul Kelly
-' YouTube video: https://youtu.be/gkLB-xu_JTU
-' Description: This version uses the ArrayList which is an external library
-'               so will not work on the Mac. See FilterDataWindowsMac above for
-'               use with the Mac.
-' Note: This is 10 to 20 times faster than using the Filter function in FilterDataWindowsMac
-Private Function FilterDataWindowsOnly() As Variant
-
-    Dim coll As Object
-    Set coll = CreateObject("System.Collections.ArrayList")
+Private Function FilterData() As Variant
    
     Dim textPattern As String
     textPattern = myTextBox.value
+    
+    ' Create an array to store the filtered items
+    Dim filteredItems() As String
+    ReDim filteredItems(0 To m_maxRows - 1)
 
-    ' Go through the items
-    Dim item As Variant
-    Dim count As Long: count = 1
-    For Each item In m_listOfItems
+    ' Read through all the items in the full list
+    Dim i As Long
+    Dim count As Long: count = 0
+    For i = LBound(m_listOfItems) To UBound(m_listOfItems)
         ' Using Instr instead of Like so we can set the case sensitivity
-        If InStr(1, item, myTextBox.value, m_compareMethod) > 0 Then
-            coll.Add item
+        If InStr(1, m_listOfItems(i, 1), textPattern, m_compareMethod) > 0 Then
+            filteredItems(count) = m_listOfItems(i, 1)
             count = count + 1
             If m_showAllMatches = False Then
                 ' Only show the max number of rows
-                If count > m_maxRows Then Exit For
+                If count >= m_maxRows Then Exit For
             End If
         End If
     Next
     
-    FilterDataWindowsOnly = coll.ToArray
+    ' use variant so we can check later if the array is empty
+    Dim finalItems As Variant
+    If count > 0 Then
+        ReDim finalItems(0 To count - 1)
+        For i = 0 To count - 1
+            finalItems(i) = filteredItems(i)
+        Next i
+    End If
+    
+    FilterData = finalItems
 
 End Function
-
 
